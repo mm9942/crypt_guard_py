@@ -1,0 +1,12 @@
+[package]
+name = "crypt_guard_py"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Crypt Guard is a Python module for cryptographic operations using `crypt_guard_py`, the pyo3 for the rust crate: `crypt_guard`. It provides a user-friendly object-oriented interface for encryption, decryption, signing, and verification."
+repository = "https://github.com/mm9942/crypt_guard_py"
+keywords = ["crypt_guard", "crypt_guard_py", "crypt_guard_lite", "crypt_guard_python", "crypt_guard_pyo3"]
+
+[dependencies]
+crypt_guard_lite = "0.2.2"
+pyo3 = { version = "0.21.2", features = ["extension-module"] }
