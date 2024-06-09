@@ -18,19 +18,6 @@ pub enum CryptGuardMode {
 
 #[pymethods]
 impl CryptGuardMode {
-    pub fn as_str(&self) -> &str {
-        match self {
-            CryptGuardMode::AEncrypt => "AEncrypt",
-            CryptGuardMode::EEncrypt => "EEncrypt",
-            CryptGuardMode::ADecrypt => "ADecrypt",
-            CryptGuardMode::EDecrypt => "EDecrypt",
-            CryptGuardMode::Sign => "Sign",
-            CryptGuardMode::Detached => "Detached",
-            CryptGuardMode::Verify => "Verify",
-            CryptGuardMode::Open => "Open",
-        }
-    }
-
     #[staticmethod]
     pub fn a_encrypt() -> Self {
         CryptGuardMode::AEncrypt
@@ -100,13 +87,9 @@ impl KeyTypes {
 
 #[pyclass]
 pub struct CryptGuardPy {
-    #[pyo3(get, set)]
     key: Vec<u8>,
-    #[pyo3(get, set)]
     mode: CryptGuardMode,
-    #[pyo3(get, set)]
     key_size: usize,
-    #[pyo3(get, set)]
     key_type: KeyTypes,
 }
 
@@ -140,60 +123,60 @@ impl CryptGuardPy {
         }
     }
 
-    pub fn a_encrypt(&self, data: Vec<u8>, passphrase: &str) -> Result<(Vec<u8>, Vec<u8>), PyErr> {
+    pub fn a_encrypt(&self, data: Vec<u8>, passphrase: &str) -> PyResult<(Vec<u8>, Vec<u8>)> {
         let mut guard = CryptGuard::cryptography(self.key.clone(), self.key_size, passphrase.to_string(), None, None);
-        Ok(guard.aencrypt(data).unwrap())
+        guard.aencrypt(data).map_err(|e| PyErr::new::<pyo3::exceptions::PyException, _>(format!("{:?}", e)))
     }
 
-    pub fn a_decrypt(&self, data: Vec<u8>, passphrase: &str, cipher: Vec<u8>) -> Result<Vec<u8>, PyErr> {
+    pub fn a_decrypt(&self, data: Vec<u8>, passphrase: &str, cipher: Vec<u8>) -> PyResult<Vec<u8>> {
         let mut guard = CryptGuard::cryptography(self.key.clone(), self.key_size, passphrase.to_string(), Some(cipher), None);
-        Ok(guard.adecrypt(data).unwrap())
+        guard.adecrypt(data).map_err(|e| PyErr::new::<pyo3::exceptions::PyException, _>(format!("{:?}", e)))
     }
 
-    pub fn x_encrypt(&self, data: Vec<u8>, passphrase: &str) -> Result<(Vec<u8>, Vec<u8>, String), PyErr> {
+    pub fn x_encrypt(&self, data: Vec<u8>, passphrase: &str) -> PyResult<(Vec<u8>, Vec<u8>, String)> {
         let mut guard = CryptGuard::cryptography(self.key.clone(), self.key_size, passphrase.to_string(), None, None);
-        Ok(guard.xencrypt(data).unwrap())
+        guard.xencrypt(data).map_err(|e| PyErr::new::<pyo3::exceptions::PyException, _>(format!("{:?}", e)))
     }
 
-    pub fn x_decrypt(&self, data: Vec<u8>, passphrase: &str, cipher: Vec<u8>, nonce: String) -> Result<Vec<u8>, PyErr> {
+    pub fn x_decrypt(&self, data: Vec<u8>, passphrase: &str, cipher: Vec<u8>, nonce: String) -> PyResult<Vec<u8>> {
         let mut guard = CryptGuard::cryptography(self.key.clone(), self.key_size, passphrase.to_string(), Some(cipher), None);
-        Ok(guard.xdecrypt(data, nonce).unwrap())
+        guard.xdecrypt(data, nonce).map_err(|e| PyErr::new::<pyo3::exceptions::PyException, _>(format!("{:?}", e)))
     }
 
-    pub fn sign(&self, data: Vec<u8>) -> Result<Vec<u8>, PyErr> {
+    pub fn sign(&self, data: Vec<u8>) -> PyResult<Vec<u8>> {
         let mut guard = CryptGuard::signature(self.key.clone(), match self.key_type {
             KeyTypes::Falcon => KeyVariants::Falcon,
             KeyTypes::Dilithium => KeyVariants::Dilithium,
-            KeyTypes::Kyber => panic!("Kyber is not a signing key type"),
+            KeyTypes::Kyber => return Err(PyErr::new::<pyo3::exceptions::PyException, _>("Kyber is not a signing key type")),
         }, self.key_size);
-        Ok(guard.signed_data(data).unwrap())
+        guard.signed_data(data).map_err(|e| PyErr::new::<pyo3::exceptions::PyException, _>(format!("{:?}", e)))
     }
 
-    pub fn detached(&self, data: Vec<u8>) -> Result<Vec<u8>, PyErr> {
+    pub fn detached(&self, data: Vec<u8>) -> PyResult<Vec<u8>> {
         let mut guard = CryptGuard::signature(self.key.clone(), match self.key_type {
             KeyTypes::Falcon => KeyVariants::Falcon,
             KeyTypes::Dilithium => KeyVariants::Dilithium,
-            KeyTypes::Kyber => panic!("Kyber is not a signing key type"),
+            KeyTypes::Kyber => return Err(PyErr::new::<pyo3::exceptions::PyException, _>("Kyber is not a signing key type")),
         }, self.key_size);
-        Ok(guard.detached(data).unwrap())
+        guard.detached(data).map_err(|e| PyErr::new::<pyo3::exceptions::PyException, _>(format!("{:?}", e)))
     }
 
-    pub fn verify(&self, data: Vec<u8>, signature: Vec<u8>) -> Result<bool, PyErr> {
+    pub fn verify(&self, data: Vec<u8>, signature: Vec<u8>) -> PyResult<bool> {
         let mut guard = CryptGuard::signature(self.key.clone(), match self.key_type {
             KeyTypes::Falcon => KeyVariants::Falcon,
             KeyTypes::Dilithium => KeyVariants::Dilithium,
-            KeyTypes::Kyber => panic!("Kyber is not a signing key type"),
+            KeyTypes::Kyber => return Err(PyErr::new::<pyo3::exceptions::PyException, _>("Kyber is not a signing key type")),
         }, self.key_size);
-        Ok(guard.verify(data, signature).unwrap())
+        guard.verify(data, signature).map_err(|e| PyErr::new::<pyo3::exceptions::PyException, _>(format!("{:?}", e)))
     }
 
-    pub fn open(&self, signature: Vec<u8>) -> Result<Vec<u8>, PyErr> {
+    pub fn open(&self, signature: Vec<u8>) -> PyResult<Vec<u8>> {
         let mut guard = CryptGuard::signature(self.key.clone(), match self.key_type {
             KeyTypes::Falcon => KeyVariants::Falcon,
             KeyTypes::Dilithium => KeyVariants::Dilithium,
-            KeyTypes::Kyber => panic!("Kyber is not a signing key type"),
+            KeyTypes::Kyber => return Err(PyErr::new::<pyo3::exceptions::PyException, _>("Kyber is not a signing key type")),
         }, self.key_size);
-        Ok(guard.open(signature).unwrap())
+        guard.open(signature).map_err(|e| PyErr::new::<pyo3::exceptions::PyException, _>(format!("{:?}", e)))
     }
 }
 
