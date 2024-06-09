@@ -11,17 +11,20 @@ env:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
+    strategy:
+      max-parallel: 6
     steps:
     - uses: actions/checkout@v4
+    
+    - name: Build
+      run: cargo build --verbose
       
-    - name: Build & Install Maturin
-      run: |
-        cargo install maturin --verbose
-        cargo build --verbose
-        maturin build
+    - name: Install Maturin
+      run: cargo install maturin --verbose
+      
+    - name: Build Maturin
+      run: maturin build
 
     - name: Run tests
       run: cargo test --verbose
