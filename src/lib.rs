@@ -1,7 +1,7 @@
 use pyo3::prelude::*;
 use pyo3::types::PyModule;
 use pyo3::PyResult;
-use crypt_guard::{
+use ::crypt_guard::{
     KyberFunctions,
     KeyControKyber1024,
     KyberKeyFunctions,
@@ -266,7 +266,7 @@ impl CryptGuardPy {
 
     #[staticmethod]
     pub fn keypair(key_type: KeyTypes, key_size: usize) -> PyResult<(Vec<u8>, Vec<u8>)> {
-        use crypt_guard::KDF::*;
+        use ::crypt_guard::KDF::*;
         match key_type {
             KeyTypes::Kyber => {
                 let (secret_key, public_key) = match key_size {
@@ -299,7 +299,7 @@ impl CryptGuardPy {
 
     // Signing and verification logic remains the same
     pub fn sign(&self, data: Vec<u8>) -> PyResult<Vec<u8>> {
-        use crypt_guard::KDF::*;
+        use ::crypt_guard::KDF::*;
         match self.key_type {
             KeyTypes::Falcon => {
                 if self.key_size == 1024 {
@@ -328,7 +328,7 @@ impl CryptGuardPy {
     }
 
     pub fn detached(&self, data: Vec<u8>) -> PyResult<Vec<u8>> {
-        use crypt_guard::KDF::*;
+        use ::crypt_guard::KDF::*;
         match self.key_type {
             KeyTypes::Falcon => {
                 if self.key_size == 1024 {
@@ -357,7 +357,7 @@ impl CryptGuardPy {
     }
 
     pub fn verify(&self, signature: Vec<u8>, data: Vec<u8>) -> PyResult<bool> {
-        use crypt_guard::KDF::*;
+        use ::crypt_guard::KDF::*;
         match self.key_type {
             KeyTypes::Falcon => {
                 if self.key_size == 1024 {
@@ -386,7 +386,7 @@ impl CryptGuardPy {
     }
 
     pub fn open(&self, data: Vec<u8>) -> PyResult<Vec<u8>> {
-        use crypt_guard::KDF::*;
+        use ::crypt_guard::KDF::*;
         match self.key_type {
             KeyTypes::Falcon => {
                 if self.key_size == 1024 {
@@ -416,7 +416,7 @@ impl CryptGuardPy {
 }
 
 #[pymodule]
-fn crypt_guard_py(_py: Python, m: &PyModule) -> PyResult<()> {
+fn crypt_guard(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<KeyTypes>()?;
     m.add_class::<CipherAES>()?;
     m.add_class::<CipherAES_XTS>()?;
