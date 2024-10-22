@@ -1,6 +1,0 @@
-setup.py
-crypt_guard.egg-info/PKG-INFO
-crypt_guard.egg-info/SOURCES.txt
-crypt_guard.egg-info/dependency_links.txt
-crypt_guard.egg-info/requires.txt
-crypt_guard.egg-info/top_level.txt
